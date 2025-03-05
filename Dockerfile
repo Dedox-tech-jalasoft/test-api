@@ -11,4 +11,4 @@ COPY --from=build-step /Deployment ./
 EXPOSE 8080
 EXPOSE 8081
 
-ENTRYPOINT ASPNETCORE_URLS=http://+:$PORT dotnet WebApi.dll
+ENTRYPOINT ["dotnet", "WebApi.dll"]
