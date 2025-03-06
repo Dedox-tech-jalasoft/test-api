@@ -10,5 +10,7 @@ namespace WebApi.Infrastructure.Context
         }
 
         public DbSet<Event> Events { get; set; }
+        public DbSet<Entities.Application> Applications { get; set; }
+        public DbSet<Entities.User> Users { get; set; }
     }
 }
