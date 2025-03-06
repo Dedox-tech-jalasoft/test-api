@@ -18,19 +18,19 @@ namespace WebApi.Infrastructure.Repositories
             this.logger = logger;
         }
 
-        public async Task<OneOf<IEnumerable<EventModel>, Error>> GetAllEventsAsync(CancellationToken cancellationToken)
+        public async Task<OneOf<List<EventModel>, Error>> GetAllEventsAsync(Guid applicationId, CancellationToken cancellationToken)
         {
             try
             {
                 List<EventModel> events = await databaseContext.Events
                     .AsNoTracking()
                     .TagWithCallSite()
+                    .Where(eventEntity => eventEntity.ApplicationId == applicationId)
                     .Select(eventEntity => new EventModel()
                     {
                         Id = eventEntity.Id,
                         Name = eventEntity.Name,
                         Date = eventEntity.Date,
-                        AvailableTickets = eventEntity.AvailableTickets,
                         Image = eventEntity.Image,
                     })
                     .ToListAsync(cancellationToken);

@@ -15,9 +15,19 @@ namespace WebApi.Application.Services
             this.eventRepository = eventRepository;
         }
 
-        public async Task<OneOf<IEnumerable<EventModel>, Error>> GetAllEventsAsync(CancellationToken cancellationToken)
-        {
-            return await eventRepository.GetAllEventsAsync(cancellationToken);
+        public async Task<OneOf<List<EventModel>, Error<string>, Error>> GetAllEventsAsync(Guid applicationId, CancellationToken cancellationToken)
+        {  
+            if (applicationId == Guid.Empty)
+            {
+                return new Error<string>("ApplicationId is required.");
+            }
+
+            OneOf<List<EventModel>, Error> events = await eventRepository
+                .GetAllEventsAsync(applicationId, cancellationToken);
+
+            return events.Match<OneOf<List<EventModel>, Error<string>, Error>>(
+                eventListResult => eventListResult,
+                error => error);    
         }
     }
 }

@@ -19,15 +19,16 @@ namespace WebApi.Controllers
             this.eventService = eventService;
         }
 
-        [ProducesResponseType<IEnumerable<EventModel>>((int)HttpStatusCode.OK)]
+        [ProducesResponseType<List<EventModel>>((int)HttpStatusCode.OK)]
         [ProducesResponseType<ProblemDetails>((int)HttpStatusCode.InternalServerError)]
         [HttpGet]
-        public async Task<IActionResult> GetAllEventsAsync (CancellationToken cancellationToken)
+        public async Task<IActionResult> GetAllEventsAsync ([FromQuery] Guid applicationId, CancellationToken cancellationToken)
         {
-            OneOf<IEnumerable<EventModel>, Error> result = await eventService.GetAllEventsAsync(cancellationToken);
+            OneOf<List<EventModel>, Error<string>, Error> result = await eventService.GetAllEventsAsync(applicationId, cancellationToken);
 
             return result.Match<ActionResult>(
                 events => Ok(events),
+                badRequest => Problem(detail: badRequest.Value, statusCode: (int)HttpStatusCode.BadRequest),
                 error => Problem());
         }
     }
