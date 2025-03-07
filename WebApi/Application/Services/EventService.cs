@@ -30,6 +30,27 @@ namespace WebApi.Application.Services
             return await eventRepository.CreateEventAsync(createEventRequestModel, cancellationToken);
         }
 
+        public async Task<OneOf<Success, Error<string>, NotFound, Error>> DeleteEventAsync(Guid applicationId, Guid eventId, CancellationToken cancellationToken)
+        {
+            if (applicationId == Guid.Empty)
+            {
+                return new Error<string>("ApplicationId is required.");
+            }
+
+            if (eventId == Guid.Empty)
+            {
+                return new Error<string>("EventId is required.");
+            }
+
+            OneOf<Success, NotFound, Error> deleteResult = await eventRepository
+                .DeleteEventAsync(applicationId, eventId, cancellationToken);
+
+            return deleteResult.Match<OneOf<Success, Error<string>, NotFound, Error>>(
+                success => success,
+                notFound => notFound,
+                error => error);
+        }
+
         public async Task<OneOf<List<EventModel>, Error<string>, Error>> GetAllEventsAsync(Guid applicationId, CancellationToken cancellationToken)
         {  
             if (applicationId == Guid.Empty)

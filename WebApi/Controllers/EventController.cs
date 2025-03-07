@@ -66,5 +66,23 @@ namespace WebApi.Controllers
                 badRequest => Problem(detail: badRequest.Value, statusCode: (int)HttpStatusCode.BadRequest),
                 error => Problem());
         }
+
+        [ProducesResponseType((int)HttpStatusCode.NoContent)]
+        [ProducesResponseType<ProblemDetails>((int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType<ProblemDetails>((int)HttpStatusCode.NotFound)]
+        [ProducesResponseType<ProblemDetails>((int)HttpStatusCode.InternalServerError)]
+        [HttpDelete]
+        [Route("{eventId}")]
+        public async Task<ActionResult> DeleteEventAsync([FromQuery] Guid applicationId, [FromRoute] Guid eventId, CancellationToken cancellationToken)
+        {
+            OneOf<Success, Error<string>, NotFound, Error> result = await eventService
+                .DeleteEventAsync(applicationId, eventId, cancellationToken);
+
+            return result.Match<ActionResult>(
+                success => StatusCode((int)HttpStatusCode.NoContent),
+                badRequest => Problem(detail: badRequest.Value, statusCode: (int)HttpStatusCode.BadRequest),
+                notFound => NotFound(),
+                error => Problem());
+        }
     }
 }

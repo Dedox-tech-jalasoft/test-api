@@ -57,6 +57,36 @@ namespace WebApi.Infrastructure.Repositories
             }
         }
 
+        public async Task<OneOf<Success, NotFound, Error>> DeleteEventAsync(Guid applicationId, Guid eventId, CancellationToken cancellationToken)
+        {
+            try
+            {
+                Event? eventEntity = await databaseContext.Events
+                    .TagWithCallSite()
+                    .Where(entity => entity.ApplicationId == applicationId)
+                    .Where(entity => entity.Id == eventId)
+                    .FirstOrDefaultAsync(cancellationToken);
+
+                if (eventEntity is null)
+                {
+                    return new NotFound();
+                }
+
+                databaseContext.Events.Remove(eventEntity);
+
+                await databaseContext.SaveChangesAsync(cancellationToken);
+
+                return new Success();
+            }
+
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Error deleting Event {EventId} for Application {ApplicationId}", eventId, applicationId);
+
+                return new Error();
+            }
+        }
+
         public async Task<OneOf<List<EventModel>, Error>> GetAllEventsAsync(Guid applicationId, CancellationToken cancellationToken)
         {
             try
