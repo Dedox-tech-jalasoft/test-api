@@ -7,5 +7,6 @@ namespace WebApi.Domain.Services
     public interface IEventService
     {
         public Task<OneOf<List<EventModel>, Error<string>, Error>> GetAllEventsAsync(Guid applicationId, CancellationToken cancellationToken);
+        public Task<OneOf<EventDetailsModel, Error<string>, NotFound, Error>> GetEventAsync(Guid applicationId, Guid eventId, CancellationToken cancellationToken);
     }
 }

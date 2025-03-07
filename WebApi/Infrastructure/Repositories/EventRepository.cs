@@ -31,6 +31,7 @@ namespace WebApi.Infrastructure.Repositories
                         Id = eventEntity.Id,
                         Name = eventEntity.Name,
                         Date = eventEntity.Date,
+                        Price = eventEntity.Price,
                         Image = eventEntity.Image,
                     })
                     .ToListAsync(cancellationToken);
@@ -41,6 +42,42 @@ namespace WebApi.Infrastructure.Repositories
             catch (Exception ex)
             {
                 logger.LogError(ex, "Error getting the list of events");
+
+                return new Error();
+            }
+        }
+
+        public async Task<OneOf<EventDetailsModel, NotFound, Error>> GetEventAsync(Guid applicationId, Guid eventId, CancellationToken cancellationToken)
+        {
+            try
+            {
+                EventDetailsModel? eventDetails = await databaseContext.Events
+                    .AsNoTracking()
+                    .TagWithCallSite()
+                    .Where(eventEntity => eventEntity.ApplicationId == applicationId)
+                    .Where(evenEntity => evenEntity.Id == eventId)
+                    .Select(evenEntity => new EventDetailsModel()
+                    {
+                        Id = evenEntity.Id,
+                        Name = evenEntity.Name,
+                        Date = evenEntity.Date,
+                        Price = evenEntity.Price,
+                        Description = evenEntity.Description,
+                        Image = evenEntity.Image
+                    })
+                    .FirstOrDefaultAsync(cancellationToken);
+
+                if (eventDetails is null)
+                {
+                    return new NotFound();
+                }
+
+                return eventDetails;
+            }
+
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Error getting event {EventId} from database", eventId);
 
                 return new Error();
             }

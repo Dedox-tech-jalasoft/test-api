@@ -12,5 +12,7 @@
         public string Description { get; set; } = string.Empty;
         public Application? Application { get; set; }
         public Guid ApplicationId { get; set; }
+        public ICollection<User> Users { get; set; } = new List<User>();
+        public ICollection<Booking> Bookings { get; set; } = new List<Booking>();
     }
 }
