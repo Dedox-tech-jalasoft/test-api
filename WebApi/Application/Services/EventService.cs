@@ -107,5 +107,26 @@ namespace WebApi.Application.Services
                 notFound => notFound,
                 error => error);
         }
+
+        public async Task<OneOf<Success, Error<string>, NotFound, Error>> UpdateEventAsync(Guid applicationId, Guid eventId, UpdateEventRequestModel updateEventRequestModel, CancellationToken cancellationToken)
+        {
+            if (applicationId == Guid.Empty)
+            {
+                return new Error<string>("ApplicationId is required.");
+            }
+
+            if (eventId == Guid.Empty)
+            {
+                return new Error<string>("EventId is required.");
+            }
+
+            OneOf<Success, NotFound, Error> updateResult = await eventRepository
+                .UpdateEventAsync(applicationId, eventId, updateEventRequestModel, cancellationToken);
+
+            return updateResult.Match<OneOf<Success, Error<string>, NotFound, Error>>(
+                success => success,
+                notFound => notFound,
+                error => error);
+        }
     }
 }

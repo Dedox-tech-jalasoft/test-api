@@ -11,5 +11,6 @@ namespace WebApi.Domain.Repositories
         public Task<OneOf<List<EventModel>, NotFound, Error>> GetEventsByUserIdAsync(Guid applicationId, Guid userId, CancellationToken cancellationToken);
         public Task<OneOf<Success<Guid>, Error<string>, Error>> CreateEventAsync(CreateEventRequestModel createEventRequestModel, CancellationToken cancellationToken);
         public Task<OneOf<Success, NotFound, Error>> DeleteEventAsync(Guid applicationId, Guid eventId, CancellationToken cancellationToken);
+        public Task<OneOf<Success, NotFound, Error>> UpdateEventAsync(Guid applicationId, Guid eventId, UpdateEventRequestModel updateEventRequestModel, CancellationToken cancellationToken);
     }
 }

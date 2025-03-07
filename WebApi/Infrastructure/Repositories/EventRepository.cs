@@ -196,5 +196,39 @@ namespace WebApi.Infrastructure.Repositories
                 return new Error();
             }
         }
+
+        public async Task<OneOf<Success, NotFound, Error>> UpdateEventAsync(Guid applicationId, Guid eventId, UpdateEventRequestModel updateEventRequestModel, CancellationToken cancellationToken)
+        {
+            try
+            {
+                Event? eventEntity = await databaseContext.Events
+                    .TagWithCallSite()
+                    .Where(eventEntity => eventEntity.ApplicationId == applicationId)
+                    .Where(eventEntity => eventEntity.Id == eventId)
+                    .FirstOrDefaultAsync(cancellationToken);
+
+                if (eventEntity is null)
+                {
+                    return new NotFound();
+                }
+
+                eventEntity.Date = updateEventRequestModel.Date;
+                eventEntity.Description = updateEventRequestModel.Description;
+                eventEntity.Image = updateEventRequestModel.Image;
+                eventEntity.Location = updateEventRequestModel.Location;
+                eventEntity.Price = updateEventRequestModel.Price;
+
+                await databaseContext.SaveChangesAsync(cancellationToken);
+
+                return new Success();
+            }
+
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Error updating event {EventId} for application {ApplicationId}", eventId, applicationId);
+
+                return new Error();
+            }
+        }
     }
 }

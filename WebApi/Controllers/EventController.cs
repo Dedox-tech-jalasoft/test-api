@@ -84,5 +84,23 @@ namespace WebApi.Controllers
                 notFound => NotFound(),
                 error => Problem());
         }
+
+        [ProducesResponseType((int)HttpStatusCode.NoContent)]
+        [ProducesResponseType<ProblemDetails>((int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType<ProblemDetails>((int)HttpStatusCode.NotFound)]
+        [ProducesResponseType<ProblemDetails>((int)HttpStatusCode.InternalServerError)]
+        [HttpPatch]
+        [Route("{eventId}")]
+        public async Task<ActionResult> UpdateEventAsync([FromQuery] Guid applicationId, [FromRoute] Guid eventId, UpdateEventRequestModel updateEventRequestModel, CancellationToken cancellationToken)
+        {
+            OneOf<Success, Error<string>, NotFound, Error> result = await eventService
+                .UpdateEventAsync(applicationId, eventId, updateEventRequestModel, cancellationToken);
+
+            return result.Match<ActionResult>(
+                success => StatusCode((int)HttpStatusCode.NoContent),
+                badRequest => Problem(detail: badRequest.Value, statusCode: (int)HttpStatusCode.BadRequest),
+                notFound => NotFound(),
+                error => Problem());
+        }
     }
 }
