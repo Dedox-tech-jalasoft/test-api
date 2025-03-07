@@ -4,6 +4,7 @@ using OneOf.Types;
 using WebApi.Domain.Models;
 using WebApi.Domain.Repositories;
 using WebApi.Infrastructure.Context;
+using WebApi.Infrastructure.Entities;
 
 namespace WebApi.Infrastructure.Repositories
 {
@@ -78,6 +79,43 @@ namespace WebApi.Infrastructure.Repositories
             catch (Exception ex)
             {
                 logger.LogError(ex, "Error getting event {EventId} from database", eventId);
+
+                return new Error();
+            }
+        }
+
+        public async Task<OneOf<List<EventModel>, NotFound, Error>> GetEventsByUserIdAsync(Guid applicationId, Guid userId, CancellationToken cancellationToken)
+        {
+            try
+            {
+                User? userEntity = await databaseContext.Users
+                    .AsNoTracking()
+                    .TagWithCallSite()
+                    .Include(userEntity => userEntity.Events)
+                    .Where(userEntity => userEntity.Id == userId)
+                    .FirstOrDefaultAsync(cancellationToken);
+
+                if (userEntity is null)
+                {
+                    return new NotFound();
+                }
+
+                return userEntity.Events
+                    .Where(eventEntity => eventEntity.ApplicationId == applicationId)
+                    .Select(evenEntity => new EventModel()
+                    {
+                        Id = evenEntity.Id,
+                        Name = evenEntity.Name,
+                        Date = evenEntity.Date,
+                        Price = evenEntity.Price,
+                        Image = evenEntity.Image
+                    })
+                    .ToList();
+            }
+
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Error getting the list of events for user: {UserId}", userId);
 
                 return new Error();
             }

@@ -20,6 +20,7 @@ namespace WebApi.Controllers
         }
 
         [ProducesResponseType<List<EventModel>>((int)HttpStatusCode.OK)]
+        [ProducesResponseType<ProblemDetails>((int)HttpStatusCode.BadRequest)]
         [ProducesResponseType<ProblemDetails>((int)HttpStatusCode.InternalServerError)]
         [HttpGet]
         public async Task<IActionResult> GetAllEventsAsync ([FromQuery] Guid applicationId, CancellationToken cancellationToken)
