@@ -1,14 +1,12 @@
 ﻿namespace WebApi.Domain.Models
 {
-    public record EventDetailsModel
+    public record CreateEventRequestModel
     {
-        public Guid Id { get; set; }
+        public Guid ApplicationId { get; set; }
         public string Name { get; set; } = string.Empty;
         public DateTime Date { get; set; }
-        public string Description { get; set; } = string.Empty;
         public string Image { get; set; } = string.Empty;
-        public int AvailableTickets { get; set; }
-        public string Location { get; set; } = string.Empty;
         public decimal Price { get; set; }
+        public string Location { get; set; } = string.Empty;
     }
 }

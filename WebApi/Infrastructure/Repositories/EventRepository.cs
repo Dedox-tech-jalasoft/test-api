@@ -19,6 +19,44 @@ namespace WebApi.Infrastructure.Repositories
             this.logger = logger;
         }
 
+        public async Task<OneOf<Success<Guid>, Error<string>, Error>> CreateEventAsync(CreateEventRequestModel createEventRequestModel, CancellationToken cancellationToken)
+        {
+            try
+            {
+                bool doesApplicationExist = await databaseContext.Applications
+                    .AnyAsync(entity => entity.Id == createEventRequestModel.ApplicationId, cancellationToken);
+
+                if (!doesApplicationExist)
+                {
+                    return new Error<string>($"Application {createEventRequestModel.ApplicationId} does not exist.");
+                }
+
+                Event eventEntity = new()
+                {
+                    ApplicationId = createEventRequestModel.ApplicationId,
+                    Name = createEventRequestModel.Name,
+                    Date = createEventRequestModel.Date,
+                    Image = createEventRequestModel.Image,
+                    Price = createEventRequestModel.Price,
+                    Location = createEventRequestModel.Location,
+                    TotalTicketsAssigned = 100000
+                };
+
+                await databaseContext.Events.AddAsync(eventEntity, cancellationToken);
+
+                await databaseContext.SaveChangesAsync(cancellationToken);
+
+                return new Success<Guid>(eventEntity.Id);
+            }
+
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Error creating event for Application {ApplicationId}", createEventRequestModel.ApplicationId);
+
+                return new Error();
+            }
+        }
+
         public async Task<OneOf<List<EventModel>, Error>> GetAllEventsAsync(Guid applicationId, CancellationToken cancellationToken)
         {
             try
@@ -70,6 +108,7 @@ namespace WebApi.Infrastructure.Repositories
                         Date = evenEntity.Date,
                         Price = evenEntity.Price,
                         Description = evenEntity.Description,
+                        Location = evenEntity.Location,
                         AvailableTickets = evenEntity.TotalTicketsAssigned - eventTakenSeats,
                         Image = evenEntity.Image
                     })

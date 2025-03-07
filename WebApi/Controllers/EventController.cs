@@ -51,5 +51,20 @@ namespace WebApi.Controllers
                 notFound => NotFound(),
                 error => Problem());
         }
+
+        [ProducesResponseType((int)HttpStatusCode.Created)]
+        [ProducesResponseType<ProblemDetails>((int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType<ProblemDetails>((int)HttpStatusCode.InternalServerError)]
+        [HttpPost]
+        public async Task<ActionResult> CreateEventAsync([FromBody] CreateEventRequestModel createEventRequestModel, CancellationToken cancellationToken)
+        {
+            OneOf<Success<Guid>, Error<string>, Error> result = await eventService
+                .CreateEventAsync(createEventRequestModel, cancellationToken);
+
+            return result.Match<ActionResult>(
+                success => new ObjectResult(success.Value) { StatusCode = (int)HttpStatusCode.Created },
+                badRequest => Problem(detail: badRequest.Value, statusCode: (int)HttpStatusCode.BadRequest),
+                error => Problem());
+        }
     }
 }

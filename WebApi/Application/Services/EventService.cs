@@ -15,6 +15,21 @@ namespace WebApi.Application.Services
             this.eventRepository = eventRepository;
         }
 
+        public async Task<OneOf<Success<Guid>, Error<string>, Error>> CreateEventAsync(CreateEventRequestModel createEventRequestModel, CancellationToken cancellationToken)
+        {
+            if (createEventRequestModel.ApplicationId == Guid.Empty)
+            {
+                return new Error<string>("ApplicationId is required.");
+            }
+
+            if (createEventRequestModel.Price <= 0)
+            {
+                return new Error<string>("Price should be higher than 0.");
+            }
+
+            return await eventRepository.CreateEventAsync(createEventRequestModel, cancellationToken);
+        }
+
         public async Task<OneOf<List<EventModel>, Error<string>, Error>> GetAllEventsAsync(Guid applicationId, CancellationToken cancellationToken)
         {  
             if (applicationId == Guid.Empty)
