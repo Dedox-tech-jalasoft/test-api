@@ -52,6 +52,12 @@ namespace WebApi.Infrastructure.Repositories
         {
             try
             {
+                int eventTakenSeats = databaseContext.Bookings
+                    .AsNoTracking()
+                    .TagWithCallSite()
+                    .Where(entity => entity.EventId == eventId)
+                    .Sum(entity => entity.Count);
+
                 EventDetailsModel? eventDetails = await databaseContext.Events
                     .AsNoTracking()
                     .TagWithCallSite()
@@ -64,6 +70,7 @@ namespace WebApi.Infrastructure.Repositories
                         Date = evenEntity.Date,
                         Price = evenEntity.Price,
                         Description = evenEntity.Description,
+                        AvailableTickets = evenEntity.TotalTicketsAssigned - eventTakenSeats,
                         Image = evenEntity.Image
                     })
                     .FirstOrDefaultAsync(cancellationToken);

@@ -7,6 +7,7 @@
         public DateTime Date { get; set; }
         public string Description { get; set; } = string.Empty;
         public string Image { get; set; } = string.Empty;
+        public int AvailableTickets { get; set; }
         public decimal Price { get; set; }
     }
 }
